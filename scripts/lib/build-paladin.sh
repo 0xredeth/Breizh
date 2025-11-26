@@ -53,8 +53,9 @@ EOF
         config:
           port: 9000
           address: 0.0.0.0
+        
         ports:
-          - name: grpc
+          transportGrpc:
             port: 9000
             targetPort: 9000
     database:

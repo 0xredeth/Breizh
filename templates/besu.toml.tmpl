@@ -16,7 +16,7 @@ key-value-storage="rocksdb"
 cache-last-blocks=1000
 bonsai-historical-block-limit=1000
 receipt-compaction-enabled=true
-bonsai-limit-trie-logs-enabled=true
+bonsai-limit-trie-logs-enabled=false
 
 # P2P Network - Kubernetes Ready
 p2p-enabled=true
@@ -65,8 +65,9 @@ logging="INFO"
 color-enabled=false
 
 # Local Permissions - Node Access Control
+# Permissions file must be writable for dynamic updates, so we copy it to /data
 permissions-nodes-config-file-enabled=true
-permissions-nodes-config-file="/etc/besu/permissions_config.toml"
+permissions-nodes-config-file="/data/permissions_config.toml"
 permissions-accounts-config-file-enabled=true
-permissions-accounts-config-file="/etc/besu/permissions_config.toml"
+permissions-accounts-config-file="/data/permissions_config.toml"
 static-nodes-file="/etc/besu/static-nodes.json"

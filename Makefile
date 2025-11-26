@@ -48,9 +48,8 @@ port-forward-paladin:
 	@kubectl port-forward -n $(NAMESPACE) svc/paladin-node-0 8548:8548
 
 clean:
-	@echo "🧹 Cleaning up $(NETWORK_NAME)..."
-	@kubectl delete namespace $(NAMESPACE) --ignore-not-found
-	@rm -rf generated/
+	@echo "🧹 Phase 5: Cleaning up $(NETWORK_NAME)..."
+	@./scripts/05-clean.sh --force
 
 reset: clean all
 

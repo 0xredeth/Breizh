@@ -100,7 +100,12 @@ EOF
         local key_b64
         key_b64=$(cat "$key_file" | base64)
 
+        # Add private key
         echo "  node-${i}-key: ${key_b64}" >> "$k8s_dir/secret-keys.yaml"
+        # Add address (for miner-coinbase)
+        local addr_b64
+        addr_b64=$(echo -n "$addr" | base64)
+        echo "  node-${i}-address: ${addr_b64}" >> "$k8s_dir/secret-keys.yaml"
     done
 
     log_info "  - secret-keys.yaml"
@@ -122,6 +127,7 @@ metadata:
     app: ${NETWORK_NAME}
 spec:
   clusterIP: None
+  publishNotReadyAddresses: true
   selector:
     app: ${NETWORK_NAME}
   ports:
@@ -192,7 +198,7 @@ metadata:
 spec:
   serviceName: HEADLESS_SERVICE_PLACEHOLDER
   replicas: NODE_COUNT_PLACEHOLDER
-  podManagementPolicy: OrderedReady
+  podManagementPolicy: Parallel
   selector:
     matchLabels:
       app: NETWORK_NAME_PLACEHOLDER
@@ -212,18 +218,29 @@ spec:
               echo "Initializing node-${NODE_INDEX}..."
               cp /secrets/node-${NODE_INDEX}-key /data/key
               chmod 600 /data/key
-              echo "Key copied successfully"
+              cp /secrets/node-${NODE_INDEX}-address /data/address
+              # Copy permissions config to writable location
+              cp /etc/besu/permissions_config.toml /data/permissions_config.toml
+              chmod 644 /data/permissions_config.toml
+              echo "Key, address, and permissions copied successfully"
           volumeMounts:
             - name: secrets
               mountPath: /secrets
+              readOnly: true
+            - name: config
+              mountPath: /etc/besu
               readOnly: true
             - name: data
               mountPath: /data
       containers:
         - name: besu
           image: BESU_IMAGE_PLACEHOLDER
-          args:
-            - --config-file=/etc/besu/besu.toml
+          command:
+            - /bin/sh
+            - -c
+            - |
+              COINBASE=$(cat /data/address)
+              exec /opt/besu/bin/besu --config-file=/etc/besu/besu.toml --miner-coinbase=${COINBASE} --Xdns-enabled=true --Xdns-update-enabled=true
           ports:
             - name: p2p-tcp
               containerPort: P2P_PORT_PLACEHOLDER
@@ -245,11 +262,11 @@ spec:
               mountPath: /data
           resources:
             requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
               memory: "1Gi"
               cpu: "500m"
-            limits:
-              memory: "2Gi"
-              cpu: "1000m"
           livenessProbe:
             httpGet:
               path: /liveness
