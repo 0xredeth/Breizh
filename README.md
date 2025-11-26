@@ -49,6 +49,14 @@ Check if the network is up and peering correctly.
 make verify     # Check peers, block production, and health
 ```
 
+### 4. Cleanup
+
+To remove the network and generated files:
+
+```bash
+make clean      # Delete namespace and generated files
+```
+
 ### One-liner
 
 Run the entire sequence:
@@ -87,12 +95,4 @@ graph TD
         end
     end
     User -->|port-forward| HL
-```
-
-## 🧹 Cleanup
-
-To remove the network and generated files:
-
-```bash
-make clean      # Delete namespace and generated files
 ```
