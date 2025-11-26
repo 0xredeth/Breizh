@@ -1,4 +1,6 @@
-# Besu + Paladin Dev Network
+# Breizh
+
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
 A local development environment for deploying a private **Hyperledger Besu 25.x** network with **Paladin** on **k3s (Rancher Desktop)**.
 
@@ -67,13 +69,24 @@ Key network variables can be customized in `config/network.env`:
 
 ```mermaid
 graph TD
-    subgraph K3s Cluster
-        subgraph Namespace: besu-paladin
-            B[Besu StatefulSet] <--> H[Headless Service]
-            P[Paladin Operator] --> H
+    subgraph K3s["k3s Cluster"]
+        subgraph NS["Namespace: besu-paladin"]
+            subgraph Besu["Besu StatefulSet"]
+                B0[besu-0]
+                B1[besu-1]
+                B2[besu-2]
+                B3[besu-3]
+            end
+            HL[Headless Service]
+            subgraph Paladin["Paladin Operator"]
+                P0[paladin-0] --> B0
+                P1[paladin-1] --> B1
+                P2[paladin-2] --> B2
+                P3[paladin-3] --> B3
+            end
         end
     end
-    User -->|kubectl/RPC| H
+    User -->|port-forward| HL
 ```
 
 ## 🧹 Cleanup
