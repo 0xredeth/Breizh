@@ -25,7 +25,7 @@ source "$PROJECT_DIR/config/network.env"
 export NETWORK_NAME NODE_COUNT CHAIN_ID
 export NAMESPACE HEADLESS_SERVICE CLUSTER_DOMAIN
 export P2P_PORT RPC_HTTP_PORT RPC_WS_PORT METRICS_PORT
-export PALADIN_RPC_PORT
+export PALADIN_RPC_PORT PALADIN_NODE_COUNT
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Options

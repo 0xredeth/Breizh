@@ -68,6 +68,28 @@ parse_args() {
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
+# clean_paladin()
+# Remove Paladin Helm releases before namespace deletion
+# ─────────────────────────────────────────────────────────────────────────────
+clean_paladin() {
+    log_info "Cleaning Paladin Helm releases..."
+
+    # Uninstall Paladin operator release
+    if helm list -n "$NAMESPACE" 2>/dev/null | grep -q "paladin"; then
+        log_info "Uninstalling Paladin operator..."
+        helm uninstall paladin -n "$NAMESPACE" --wait 2>/dev/null || true
+    fi
+
+    # Uninstall Paladin CRDs release
+    if helm list -n "$NAMESPACE" 2>/dev/null | grep -q "paladin-crds"; then
+        log_info "Uninstalling Paladin CRDs..."
+        helm uninstall paladin-crds -n "$NAMESPACE" --wait 2>/dev/null || true
+    fi
+
+    log_success "Paladin Helm releases cleaned"
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
 # clean_kubernetes()
 # Remove all K8s resources in the namespace
 # ─────────────────────────────────────────────────────────────────────────────
@@ -79,6 +101,9 @@ clean_kubernetes() {
         log_info "Namespace '$NAMESPACE' does not exist, skipping K8s cleanup"
         return 0
     fi
+
+    # Clean Paladin Helm releases first (before namespace deletion)
+    clean_paladin
 
     # Delete namespace (cascades to all resources)
     log_info "Deleting namespace: $NAMESPACE"

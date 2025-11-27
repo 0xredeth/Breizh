@@ -27,7 +27,7 @@ source "$PROJECT_DIR/config/network.env"
 export NETWORK_NAME NODE_COUNT CHAIN_ID
 export NAMESPACE HEADLESS_SERVICE CLUSTER_DOMAIN
 export P2P_PORT RPC_HTTP_PORT RPC_WS_PORT METRICS_PORT
-export PALADIN_RPC_PORT
+export PALADIN_RPC_PORT PALADIN_NODE_COUNT
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Options
@@ -173,6 +173,9 @@ main() {
     if [[ "$SKIP_PALADIN" != "true" ]]; then
         deploy_paladin "$k8s_dir"
         wait_for_paladin_ready 300 || log_warn "Paladin may still be starting up"
+        # NOTE: Account permissioning is DISABLED for Paladin compatibility
+        # Paladin uses dynamic HD wallet addresses (new address per transaction)
+        # Security provided by Paladin's cryptography (ZKPs, private EVM, notary)
     else
         log_info "Skipping Paladin deployment (--skip-paladin)"
     fi

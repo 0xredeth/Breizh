@@ -11,8 +11,14 @@ A local development environment for deploying a private **Hyperledger Besu 25.x*
 * **Consensus**: QBFT (4 nodes minimum).
 * **Privacy**: Integrated Paladin with `noto`, `zeto`, and `pente` domains.
 * **Gas**: Zero gas fees (EIP-1559 `zeroBaseFee` + `min-gas-price=0`).
+* **EVM**: Shanghai-enabled (`shanghaiTime: 0`) for PUSH0 opcode support.
 * **Storage**: Efficient Bonsai storage format.
 * **Architecture**: Besu StatefulSet + Paladin Operator.
+
+### Security Model
+
+* **Node Permissioning**: Enabled - only allowlisted enodes can join the network.
+* **Account Permissioning**: Disabled - Paladin uses HD wallet key derivation (`autoHDWallet`) which generates a new signing address for every transaction for privacy. Security is provided by Paladin's cryptography (ZKPs, private EVM, notary oversight).
 
 ## 📋 Prerequisites
 

@@ -81,20 +81,12 @@ build_permissions_config() {
     done <<< "$enodes"
     toml_content+="\n]\n\n"
 
-    # Accounts allowlist (validator addresses only)
-    toml_content+="accounts-allowlist = [\n"
-    first=true
-    for i in $(seq 0 $((NODE_COUNT - 1))); do
-        local addr
-        addr=$(jq -r ".\"node-$i\"" "$mapping_file")
-        if [[ "$first" == "true" ]]; then
-            toml_content+="  \"${addr}\""
-            first=false
-        else
-            toml_content+=",\n  \"${addr}\""
-        fi
-    done
-    toml_content+="\n]\n"
+    # NOTE: accounts-allowlist REMOVED for Paladin compatibility
+    # Paladin uses HD wallet key derivation (autoHDWallet) which generates
+    # a NEW signing address for EVERY transaction for privacy.
+    # This is fundamentally incompatible with Besu's static account allowlists.
+    # Account permissioning is disabled in besu.toml (permissions-accounts-config-file-enabled=false)
+    # Security is provided by Paladin's cryptography (ZKPs, private EVM, notary).
 
     echo -e "$toml_content" > "$config_dir/permissions_config.toml"
     log_success "Generated: config/permissions_config.toml"

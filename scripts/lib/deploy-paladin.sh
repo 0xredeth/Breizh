@@ -3,8 +3,8 @@
 # Deploy Paladin functions (Phase 3.3)
 # ============================================================
 
-# Paladin Helm repository
-readonly PALADIN_HELM_REPO="https://LF-Decentralized-Trust-labs.github.io/paladin"
+# Paladin Helm repository (correct URL from official docs)
+readonly PALADIN_HELM_REPO="https://lfdt-paladin.github.io/paladin"
 readonly PALADIN_HELM_REPO_NAME="paladin"
 
 setup_paladin_helm_repo() {
@@ -35,21 +35,21 @@ deploy_paladin() {
     helm upgrade --install paladin-crds "$PALADIN_HELM_REPO_NAME/paladin-operator-crd" \
         --namespace "$NAMESPACE" --create-namespace
 
-    # Step 2: Install cert-manager
+    # Step 2: Install cert-manager (skip if already installed)
     log_info "Installing cert-manager..."
-    helm install cert-manager --namespace cert-manager --version v1.16.1 \
-        jetstack/cert-manager --create-namespace --set crds.enabled=true --wait
-
-    # Step 3: Install/Upgrade Paladin operator
-    if helm list -n "$NAMESPACE" | grep -q "^${release_name}"; then
-        log_info "Upgrading existing release..."
-        helm upgrade "$release_name" "$PALADIN_HELM_REPO_NAME/paladin-operator" \
-            -n "$NAMESPACE" -f "$values_file"
+    if helm list -n cert-manager 2>/dev/null | grep -q "cert-manager"; then
+        log_info "cert-manager already installed, skipping..."
     else
-        log_info "Installing Paladin operator..."
-        helm install "$release_name" "$PALADIN_HELM_REPO_NAME/paladin-operator" \
-            -n "$NAMESPACE" --create-namespace -f "$values_file"
+        helm install cert-manager --namespace cert-manager --version v1.16.1 \
+            jetstack/cert-manager --create-namespace --set crds.enabled=true --wait || {
+            log_warn "cert-manager installation failed - may already exist"
+        }
     fi
+
+    # Step 3: Install/Upgrade Paladin operator (use upgrade --install to handle both cases)
+    log_info "Installing/Upgrading Paladin operator..."
+    helm upgrade --install "$release_name" "$PALADIN_HELM_REPO_NAME/paladin-operator" \
+        -n "$NAMESPACE" --create-namespace -f "$values_file" --wait --timeout 5m
 
     log_success "Paladin operator deployed"
 }
@@ -65,7 +65,7 @@ wait_for_paladin_ready() {
         # Check for Paladin statefulsets (more reliable than pod labels)
         local paladin_pods
         paladin_pods=$(kubectl get pods -n "$NAMESPACE" -l "app=paladin" \
-            --no-headers 2>/dev/null | wc -l | tr -d ' ')
+            --no-headers 2>/dev/null | wc -l | tr -d '[:space:]')
 
         if [[ "$paladin_pods" -gt 0 ]]; then
             local ready_count
@@ -90,3 +90,14 @@ wait_for_paladin_ready() {
     log_error "Timeout waiting for Paladin pods"
     return 1
 }
+
+# ─────────────────────────────────────────────────────────────────────────────
+# NOTE: Account permissioning functions REMOVED
+# ─────────────────────────────────────────────────────────────────────────────
+# Besu account permissioning is DISABLED for Paladin compatibility.
+# Paladin uses HD wallet key derivation (autoHDWallet) which generates
+# a NEW signing address for EVERY transaction for privacy.
+# This is fundamentally incompatible with Besu's static account allowlists.
+# Security is provided by Paladin's cryptography (ZKPs, private EVM, notary).
+# See: besu.toml.tmpl -> permissions-accounts-config-file-enabled=false
+# ─────────────────────────────────────────────────────────────────────────────

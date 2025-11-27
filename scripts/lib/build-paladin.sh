@@ -14,15 +14,15 @@ build_paladin_values() {
 
     cat > "$k8s_dir/paladin-values.yaml" << EOF
 # Paladin Helm values for ${NETWORK_NAME}
-# Generated for ${NODE_COUNT} nodes connecting to external Besu network
+# Generated for ${PALADIN_NODE_COUNT} Paladin nodes connecting to external Besu network
 
 mode: customnet
 
 paladinNodes:
 EOF
 
-    # Generate node entries
-    for i in $(seq 0 $((NODE_COUNT - 1))); do
+    # Generate node entries (use PALADIN_NODE_COUNT for light mode support)
+    for i in $(seq 0 $((PALADIN_NODE_COUNT - 1))); do
         local besu_host="${NETWORK_NAME}-${i}.${HEADLESS_SERVICE}.${NAMESPACE}.${CLUSTER_DOMAIN}"
 
         cat >> "$k8s_dir/paladin-values.yaml" << EOF
@@ -46,37 +46,46 @@ EOF
     registries:
       - evm-registry
     transports:
-      - name: transportGrpc
+      - name: grpc
         plugin:
           type: c-shared
           library: /app/transports/libgrpc.so
         config:
           port: 9000
           address: 0.0.0.0
-        
         ports:
           transportGrpc:
             port: 9000
             targetPort: 9000
+    resources:
+      limits:
+        cpu: "2000m"
+        memory: "4Gi"
+      requests:
+        cpu: "500m"
+        memory: "2Gi"
     database:
       mode: sidecarPostgres
       migrationMode: auto
+      resources:
+        limits:
+          cpu: "1000m"
+          memory: "2Gi"
+        requests:
+          cpu: "100m"
+          memory: "512Mi"
     secretBackedSigners:
       - name: signer-auto-wallet
         secret: node-${i}.keys
         type: autoHDWallet
         keySelector: ".*"
+    config: |
+      log:
+        level: info
+    paladinRegistration:
+      nodeAdminKey: ""
 EOF
     done
-
-    # Add registration config
-    cat >> "$k8s_dir/paladin-values.yaml" << EOF
-
-paladinRegistration:
-  registryAdminNode: node-0
-  registryAdminKey: registry.operator
-  registry: evm-registry
-EOF
 
     log_success "Generated: k8s/paladin-values.yaml"
 }

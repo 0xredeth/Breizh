@@ -1,4 +1,5 @@
-.PHONY: all generate build deploy verify clean status logs info
+.PHONY: all generate build deploy verify clean status logs info light all-light \
+        dashboard-start dashboard-stop network-start network-stop network-status
 
 # Variables (loaded from config/network.env)
 SHELL := /bin/bash
@@ -7,6 +8,12 @@ export
 
 # Main targets
 all: generate build deploy verify
+
+# Light mode (single Paladin node for low-resource PCs)
+light: PALADIN_NODE_COUNT=1
+light: generate build deploy verify
+
+all-light: light
 
 generate:
 	@echo "🔑 Phase 1: Generating keys and genesis for $(NETWORK_NAME)..."
@@ -46,6 +53,23 @@ port-forward-rpc:
 
 port-forward-paladin:
 	@kubectl port-forward -n $(NAMESPACE) svc/paladin-node-0 8548:8548
+
+# Dashboard management (Paladin UI port-forward)
+dashboard-start:
+	@./scripts/dashboard.sh start
+
+dashboard-stop:
+	@./scripts/dashboard.sh stop
+
+# Network start/stop (without destroying)
+network-start:
+	@./scripts/network-ctl.sh start
+
+network-stop:
+	@./scripts/network-ctl.sh stop
+
+network-status:
+	@./scripts/network-ctl.sh status
 
 clean:
 	@echo "🧹 Phase 5: Cleaning up $(NETWORK_NAME)..."
