@@ -1,6 +1,9 @@
 # Generated files (keys, manifests, configs)
 generated/
 
+# Playwright MCP screenshots (testing artifacts)
+.playwright-mcp/
+
 # macOS
 .DS_Store
 
@@ -14,4 +17,3 @@ generated/
 *.log
 CLAUDE.md
 breizh-besu-paladin-dev-spec.md
-.playwright-mcp

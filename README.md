@@ -71,6 +71,14 @@ Run the entire sequence:
 make all
 ```
 
+### Low-Resource Mode
+
+For machines with limited resources, deploy with fewer Paladin nodes:
+
+```bash
+make light    # 4 Besu nodes + 1 Paladin node
+```
+
 ## ⚙️ Configuration
 
 Key network variables can be customized in `config/network.env`:
