@@ -1,6 +1,10 @@
 # Generated files (keys, manifests, configs)
 generated/
 
+# Dashboard PID files
+.dashboard-pids/
+.dashboard.pid
+
 # Playwright MCP screenshots (testing artifacts)
 .playwright-mcp/
 

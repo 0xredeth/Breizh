@@ -53,9 +53,9 @@ stop_network() {
     log_info "Stopping network: $NETWORK_NAME"
     check_namespace
 
-    # Stop dashboard if running
-    if [[ -f "$PROJECT_DIR/.dashboard.pid" ]]; then
-        log_info "Stopping dashboard port-forward..."
+    # Stop dashboard port-forwards if running
+    if [[ -d "$PROJECT_DIR/.dashboard-pids" ]] || [[ -f "$PROJECT_DIR/.dashboard.pid" ]]; then
+        log_info "Stopping dashboard port-forwards..."
         "$SCRIPT_DIR/dashboard.sh" stop 2>/dev/null || true
     fi
 
