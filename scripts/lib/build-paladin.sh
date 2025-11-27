@@ -53,6 +53,9 @@ EOF
         config:
           port: 9000
           address: 0.0.0.0
+        tls:
+          secretName: node-${i}-grpc-tls
+          certName: node-${i}-grpc-tls
         ports:
           transportGrpc:
             port: 9000
@@ -83,7 +86,9 @@ EOF
       log:
         level: info
     paladinRegistration:
-      nodeAdminKey: ""
+      registryAdminNode: node-0
+      registryAdminKey: registry.operator
+      registry: evm-registry
 EOF
     done
 

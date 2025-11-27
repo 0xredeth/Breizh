@@ -17,3 +17,4 @@ generated/
 *.log
 CLAUDE.md
 breizh-besu-paladin-dev-spec.md
+.playwright-mcp
